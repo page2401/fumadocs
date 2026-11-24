@@ -13,6 +13,7 @@ description: "锁定版本 fumadocs-ui@16.19.7 + next@16.4.6 · Next.js App Rout
 | [`02. 流程图与时序图`](./02-diagrams.mdx) | 流程图与时序图 | 官方 `remarkMdxMermaid` 插件在编译期将标准 ```` ```mermaid ```` 转为 `<Mermaid chart="..." />`，由本地 `mermaid@12.3.0` 客户端渲染 SVG |
 | [`03. 数学公式排版`](./03-math.mdx) | 数学公式排版 | `remark-math@6.0.0` + 前置 `rehype-katex@7.0.1`（绕过内置 Shiki `rehypeCode` 抢占）+ 本地打包 `katex@0.19.1` 样式与字体 |
 | [`04. 目录结构与路由取舍`](./04-directory/index.mdx) | 目录结构与 `meta.json` | `content/docs/` 双层隔离 + 各层级 `meta.json` 声明中文分组名与顺序 + `createRelativeLink` 解析相对 `.mdx` 互链 |
+| [`05. 高阶代码块与语法高亮`](./05-code-blocks.mdx) | Shiki 代码块与 `tab="..."` | 内置 `rehypeCode` 支持 `title="..."`、`// [!code highlight]` 与 `// [!code ++]` 词法 Diff；`remarkCodeTab` 原生合并连续 `tab="..."` 代码块 |
 
 ## 子模块精确锁定版本档案
 

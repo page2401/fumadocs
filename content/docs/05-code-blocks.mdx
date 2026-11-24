@@ -1,0 +1,87 @@
+---
+title: "05. 高阶代码块与语法高亮"
+description: "测试 Fumadocs v16 (16.19.7) 内置 rehypeCode (Shiki) 的 title 标题栏、[!code highlight] 注释标记、[!code ++] 词法 Diff 与 remarkCodeTab 原生标签页。"
+---
+
+技术文档中超过 40% 的篇幅由代码块构成，但标准 CommonMark / GitHub Flavored Markdown 仅定义了围栏语言标识（```` ```ts ````），并未定义文件名标题栏、指定行高亮、带词法着色的行级 Diff 以及多语言 Tab 切换组。本页由原始 GFM 母版派生适配至 **Fumadocs v16 (`fumadocs-ui@16.19.7` + `fumadocs-mdx@15.6.4`)**，实测其内置 **Shiki (`rehypeCode`)** 与 **`remarkCodeTab`** 编译管线的完整表现。
+
+## 1. 代码块文件名标题栏与双主题 CSS 变量着色
+
+Fumadocs 内置 `rehypeCode` 在服务端编译期通过 Shiki 生成带明暗双主题内联 CSS 变量（`--shiki-light` / `--shiki-dark`）的静态节点，只需在围栏信息串添加 `title="scripts/resolve-route.ts"` 即可渲染 `<CodeBlock>` 顶栏与复制按钮：
+
+```ts title="scripts/resolve-route.ts"
+export interface RouteContext {
+  basePath: string
+  slug: string
+  cleanUrls: boolean
+}
+
+export function formatDocRoute(ctx: RouteContext): string {
+  const prefix = ctx.basePath.endsWith('/') ? ctx.basePath : `${ctx.basePath}/`
+  const normalized = ctx.slug.replace(/^\/+|\/+$/g, '')
+  if (!normalized || normalized === 'index') return prefix
+  return ctx.cleanUrls ? `${prefix}${normalized}/` : `${prefix}${normalized}.html`
+}
+```
+
+## 2. 关键行聚焦与高亮（`// [!code highlight]`）
+
+Fumadocs 默认启用 `@shikijs/transformers` 注释标记体系：在目标行尾添加 `// [!code highlight]`（或使用 `// [!code highlight:3]` 连续高亮多行），编译期会自动剥离标记注释并注入高亮行样式：
+
+```jsonc title="benchmark.config.json"
+{
+  "id": "ssg-benchmark",
+  "routeStyle": "clean", // [!code highlight]
+  "strictZeroCdn": true,
+  "markdown": {
+    "mathEngine": "katex",
+    // [!code highlight:3]
+    "diagramEngine": "mermaid",
+    "lineHighlight": true,
+    "codeTransformers": ["diff", "focus"]
+  }
+}
+```
+
+## 3. 保留词法着色的代码增删对比（`[!code --]` / `[!code ++]`）
+
+借助内置的 `transformerNotationDiff`，Fumadocs 无需退化为纯红绿的 `diff` 块，直接在 `ts` 代码块行尾标注 `// [!code --]` 与 `// [!code ++]` 即可同时保留 TypeScript 词法高亮与增删背景色：
+
+```ts title="scripts/mount-subsite.ts"
+export function mountSubsite(baseDir: string, subPath: string): string | null {
+  const cleanRel = decodeURIComponent(subPath).replace(/\.\./g, '') // [!code --]
+  return `${baseDir}/${cleanRel}` // [!code --]
+  const resolvedBase = path.resolve(baseDir) // [!code ++]
+  const target = path.resolve(resolvedBase, decodeURIComponent(subPath).replace(/^\/+/, '')) // [!code ++]
+  return target.startsWith(`${resolvedBase}${path.sep}`) ? target : null // [!code ++]
+}
+```
+
+## 4. 多语言运行时命令组（`remarkCodeTab` 连续 `tab="..."` 语法糖）
+
+相比需要手写多层 JSX `<Tabs>` 的传统 MDX 框架，Fumadocs 预设内置了 `remarkCodeTab` 插件：只需将相邻代码块加上 `tab="..."` 属性，编译器便会自动将它们合并为 `<CodeBlockTabs>` 横向切换面板（亦支持从 `fumadocs-ui/components/tabs` 引入通用 `<Tabs>` 组件）：
+
+```bash tab="Node.js (package.json)"
+npm ci && npm run build
+```
+
+```bash tab="Deno 2 (deno.json)"
+deno task build
+```
+
+```bash tab="Python (requirements.txt)"
+pip install -r requirements.txt && sphinx-build -b dirhtml . _build/dirhtml
+```
+
+```bash tab="Ruby (Gemfile)"
+bundle install && bundle exec jekyll build
+```
+
+## 5. 四大底层高亮引擎能力对照小结
+
+| 高亮引擎代表 | 典型采用框架 | 构建期零运行时 JS | 原生行号 / 行高亮 | 保留词法着色的 Diff |
+| :--- | :--- | :--- | :--- | :--- |
+| **Shiki / Expressive Code** | VitePress、Starlight、Fumadocs、Nextra、Rspress、Nuxt、Quartz | ✅ 纯静态内联样式 | ✅ `{1,3-5}` / `[!code highlight]` | ✅ `// [!code ++]` |
+| **Prism.js** | Docusaurus、VuePress、Eleventy (plugin)、Gatsby | ✅ 静态 Token 类名 | ✅ `{1,3-5}` / 魔法注释 | ⚠️ 需配 diff-highlight 插件 |
+| **Pygments / Rouge** | MkDocs Material、Sphinx、Pelican、Jekyll | ✅ Python/Ruby 编译直出 | ✅ `hl_lines` / `emphasize-lines` | ⚠️ 仅标准 `diff` 块红绿 |
+| **Chroma / Giallo / hljs** | Hugo (Go Chroma)、Zola (Rust Giallo)、mdBook (hljs) | ✅ (mdBook 为客户端 hljs) | ✅ Hugo/Zola 原生 `hl_lines` | ⚠️ 仅标准 `diff` 块红绿 |
