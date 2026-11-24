@@ -1,0 +1,19 @@
+---
+title: "04. 目录结构与路由取舍"
+description: "实测 Fumadocs v16 的 content/docs/ 集合隔离、各层级 meta.json 编排与 Next.js App Router 路由耦合成本。"
+---
+
+本章节基于母版 `docs/04-directory/` 多级嵌套子目录 `nested/`，实测 **Fumadocs v16** 极具辨识度的 **`content/docs/` + 分层级 `meta.json` + Next.js App Router 自管路由** 架构：
+
+1. **`content/docs/` 双层内容集合隔离**：在 `source.config.ts` 中通过 `defineDocs({ dir: 'content/docs' })` 声明内容源，与工程根目录 `README.md`、`app/` 路由代码和 `public/` 静态资源彻底解耦。
+2. **各层级 `meta.json` 精准编排与索引页自动绑定**：
+   - 在 `content/docs/meta.json`、`content/docs/04-directory/meta.json` 与 `content/docs/04-directory/nested/meta.json` 中，通过 `"title"` 指定中文折叠分组名（如 `"嵌套子目录实测 (meta.json)"`），通过 `"pages"` 数组显式指定页面顺序与 `"defaultOpen": true` 默认展开状态。
+   - 文件夹下的 `index.mdx` 会被 `fumadocs-core` 页面树构建器自动识别为该分组的入口页（点击侧边栏文件夹标题直接进入 `/fumadocs/04-directory/`），无需像 Hugo 那样区分 `_index.md` 与 `index.md`。
+3. **显式架构权衡（优缺点并存）**：
+   - **优势**：组件与布局拥有 100% React / Tailwind v4 源码级定制自由度；配合 `createRelativeLink(source, page)` 可在构建期自动将 `./nested/01-order-and-url.mdx` 相对路径解析为线上路由。
+   - **代价**：不是开箱即用的单文件配置型 SSG——项目必须自行维护 `app/layout.tsx`、`app/[[...slug]]/page.tsx`、`lib/source.ts`、`source.config.ts` 等十余个 Next.js 宿主文件；且将 `.md` 迁为 `.mdx` 后需同步更新相对链接后缀并维护各目录 `meta.json`。
+
+## 嵌套子文档实测入口
+
+- [进入子文档 A：排序前缀与 URL 纯净度权衡](./nested/01-order-and-url.mdx)
+- [进入子文档 B：多级子目录与侧边栏同步机制](./nested/02-sidebar-sync.mdx)

@@ -1,0 +1,64 @@
+---
+title: "01. 专属标注与元数据"
+description: "测试 Fumadocs v16 (16.19.7) 的 Zod v4 Frontmatter 校验、JSX <Callout> 组件、原生 HTML <details> 与 GFM Alerts 兼容性。"
+---
+
+不同静态网站生成器对“提示框 / 标注（Callouts / Admonitions）”和页面元数据的语法约定存在显著分歧。本文件由原始 GFM 母版派生适配至 **Fumadocs v16 (`fumadocs-ui@16.19.7` + `fumadocs-mdx@15.6.4`)**。
+
+## 1. Frontmatter 元数据与 Zod v4 强类型机制
+
+Fumadocs 不把自己封装成黑盒 CLI，而是通过 `source.config.ts` 中的 `defineDocs` 配合 `fumadocs-core/source/schema` 提供的 **Zod v4 `pageSchema`** 在编译期生成 `.source/server.ts` 强类型集合：
+
+- **当前页标题字段**：`title: "01. 专属标注与元数据"`（为必填字段，由路由模板 `<DocsTitle>{page.data.title}</DocsTitle>` 渲染为页面唯一主 `<h1>`，正文无需重复手写一级标题）
+- **页面摘要字段**：`description: "..."`（由 `<DocsDescription>` 自动渲染在主标题下方，可选扩展 `icon`、`full` 等字段）
+- **派生观察点**：由于 Fumadocs 原生以 `.mdx`（MDX 3）作为一等公民格式，正文中若出现未包裹反引号的裸 `<id>` 或 `{expr}` 会被直接当作 JSX 标签或 JS 表达式解析并在 `next build` 阶段报错拦截。
+
+## 2. 标准提示语义块（Fumadocs JSX `<Callout>` 组件）
+
+与 VitePress / Docusaurus / Starlight 默认推崇 `:::` 三冒号指令不同，Fumadocs 官方地道写法是在 `defaultMdxComponents` 中全局注入 JSX `<Callout>` 组件（支持 `type="info" | "idea" | "warn" | "error" | "success"` 及 `title` 属性）：
+
+<Callout type="info">
+默认信息提示块：静态站点对比平台的每个子模块均独立维护 `main`（源码）与 `page`（构建产物）双分支，互不污染提交历史。
+</Callout>
+
+<Callout type="idea" title="性能优化建议">
+在派生到各框架时，VitePress 写作 `::: tip 性能优化建议`，Starlight 写作 `:::tip[性能优化建议]`，而 Fumadocs 直接使用类型安全的 JSX 组件 `<Callout type="idea" title="性能优化建议">`。
+</Callout>
+
+<Callout type="warn" title="版本边界注意">
+注意区分各派系关键字命名——Fumadocs `<Callout>` 同时兼容 `type="warn"` 与 `type="warning"`，错误危险态则使用 `type="error"`（而非 `danger`）。
+</Callout>
+
+<Callout type="error" title="不可逆分支覆盖警告">
+自动化流水线在向 `page` 分支推送构建产物时会启用 `force_orphan: true`，切勿在 `page` 分支直接手工修改代码！
+</Callout>
+
+## 3. 可折叠详情容器（原生 HTML `<details>` 与 `<Accordions>`）
+
+在 MDX 3 中保留标准 HTML `<details>` 与 `<summary>` 标签时，只要在 `<summary>` 闭合后留出空行，内部代码块与行内数学公式即可正常解析（Fumadocs 亦提供 `fumadocs-ui/components/accordion` 组件供进阶折叠交互）：
+
+<details>
+<summary>点击展开查看 Fumadocs Callout 组件与折叠容器源码结构</summary>
+
+```mdx
+<Callout type="info" title="纯静态导出注意">
+在 Next.js output: 'export' 模式下，需关闭默认依赖服务端路由的 /api/search 或改用静态索引。
+</Callout>
+```
+
+除了代码块，折叠容器内同样支持列表、表格与数学公式 $f(x) = x^2 + 1$。
+
+</details>
+
+## 4. GitHub 风格引用警报（GFM Alerts）跨框架直通测试
+
+以下三段在**所有派生子模块中均保持一字不改**，用于测试：如果不做任何方言改写、直接把母版内容丢进目标生成器，哪些框架能原样渲染，哪些会退化为普通引用文本：
+
+> [!NOTE]
+> 这是一段标准的 GitHub Flavored Markdown `[!NOTE]` 警报文本，用于检验各生成器对母版语法的零改造直通能力。
+
+> [!IMPORTANT]
+> 跨平台迁移 Markdown 文档时，是否原生兼容 `> [!IMPORTANT]` 与 `> [!WARNING]` 直接决定了母版文档的派生改造成本。
+
+> [!CAUTION]
+> 若目标生成器未内置 GFM Alert 解析器（如 VuePress v1、Starlight 默认配置、Docsify v4 旧插件），上方标记会退化为普通引用块并原样露出 `[!CAUTION]` 字符串。

@@ -1,0 +1,9 @@
+---
+title: "嵌套子页 B：多级子目录与侧边栏同步机制"
+description: "对比 Fumadocs meta.json 的显式列表与 ... 剩余通配符机制。"
+---
+
+在纯 Markdown 母版仓库中，新增一篇子目录文档无需修改任何外部配置文件；而派生到 **Fumadocs** 后，目录下放置 `meta.json` 即可就近赋予英文目录 `nested/` 清晰的中文侧栏组名 `"嵌套子目录实测 (meta.json)"`。同时，Fumadocs 的 `meta.json` 支持 `"..."` 通配符语法（如 `"pages": ["01-order-and-url", "..."]`），既能固定核心章节顺序，又能防止新增文档因忘改配置而沦为“孤岛页”。
+
+- [返回上一篇：《嵌套子页 A：排序前缀与 URL 纯净度权衡》](./01-order-and-url.mdx)
+- [返回《04. 目录结构与路由取舍》](../index.mdx)

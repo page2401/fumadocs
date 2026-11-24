@@ -1,0 +1,8 @@
+{
+  "title": "嵌套子目录实测 (meta.json)",
+  "defaultOpen": true,
+  "pages": [
+    "01-order-and-url",
+    "02-sidebar-sync"
+  ]
+}

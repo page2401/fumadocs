@@ -1,0 +1,9 @@
+---
+title: "嵌套子页 A：排序前缀与 URL 纯净度权衡"
+description: "实测 Fumadocs meta.json pages 显式排序数组与 (group) 路由组语法对 URL 纯净度的控制能力。"
+---
+
+在母版目录 `docs/04-directory/nested/` 中，文件名使用 `01-order-and-url` 以保证在 Git 与代码编辑器中按阅读先后顺序排列。派生至 **Fumadocs** 时，`meta.json` 的 `"pages": ["01-order-and-url", "02-sidebar-sync"]` 数组已完全接管侧边栏顺序（即便去掉 `01-` 文件名前缀也不会像纯字母排序框架那样乱序；此外 Fumadocs 还支持 Next.js 风格的 `(group)` 括号目录语法实现分组不进 URL）。本基准子站保留 `01-` 文件名以直观对齐母版物理路径。
+
+- [返回《04. 目录结构与路由取舍》](../index.mdx)
+- [下一篇：《嵌套子页 B：多级子目录与侧边栏同步机制》](./02-sidebar-sync.mdx)

@@ -1,0 +1,10 @@
+{
+  "title": "Fumadocs v16 基准文档",
+  "pages": [
+    "index",
+    "01-annotations",
+    "02-diagrams",
+    "03-math",
+    "04-directory"
+  ]
+}
